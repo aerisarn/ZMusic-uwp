@@ -101,7 +101,7 @@ elseif(NOT ("vcpkg-libsndfile" IN_LIST VCPKG_MANIFEST_FEATURES))
 endif()
 
 # System MIDI support
-if(WIN32)
+if(WIN32 AND NOT CMAKE_SYSTEM_NAME STREQUAL "WindowsStore")
 	target_compile_definitions(zmusic-obj INTERFACE HAVE_SYSTEM_MIDI)
 	target_link_libraries(zmusic-obj INTERFACE winmm)
 	target_sources(zmusic-obj INTERFACE mididevices/music_win_mididevice.cpp)
@@ -119,7 +119,7 @@ elseif(NOT APPLE)
 	endif()
 endif()
 
-if(WIN32)
+if(WIN32 AND NOT CMAKE_SYSTEM_NAME STREQUAL "WindowsStore")
 	target_sources(zmusic-obj
 	INTERFACE
 		musicformats/win32/i_cd.cpp

@@ -4,13 +4,20 @@ if (VCPKG_LIBSNDFILE)
 	list(APPEND VCPKG_MANIFEST_FEATURES "vcpkg-libsndfile")
 endif()
 
+if (CMAKE_SYSTEM_NAME STREQUAL "WindowsStore")
+	message("Setting Dynamic C/CXX linking")
+	set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+	message("Using vcpkg on WindowsStore")
+	set(VCPKG_TARGET_TRIPLET "x64-uwp" CACHE STRING "" FORCE)	
+endif()
+
 project(ZMusic
 	VERSION 1.1.12
 	LANGUAGES C CXX
 )
 
 if (VCPKG_TOOLCHAIN)
-	if(VCPKG_TARGET_TRIPLET MATCHES "-static$")
+	if(NOT CMAKE_MSVC_RUNTIME_LIBRARY AND VCPKG_TARGET_TRIPLET MATCHES "-static$")
  		set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
  	endif()
 
@@ -85,6 +92,10 @@ if(MSVC)
 		# Disable warnings for unsecure CRT functions from VC8+
 		"/wd4996"
 	)
+	
+if (CMAKE_SYSTEM_NAME STREQUAL "WindowsStore")
+	add_compile_definitions("_WINDOWS_UWP")
+endif()
 
 	add_compile_definitions(
 		"UNICODE"
@@ -96,11 +107,14 @@ if(MSVC)
 
 	add_link_options(
 		"/opt:ref" # Eliminate unreferenced functions and data
-		"/opt:icf" # Perform identical COMDAT folding
-		"/nodefaultlib:msvcrt"
+		"/opt:icf" # Perform identical COMDAT folding	
 		$<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>:/TSAWARE>
 		"/LARGEADDRESSAWARE"
 	)
+	
+if (NOT CMAKE_SYSTEM_NAME STREQUAL "WindowsStore")
+	add_link_options("/nodefaultlib:msvcrt")
+endif()
 
 	# RelWithDebInfo uses /Ob1 by default instead of Ob2 like Release
 	string(REPLACE "/Ob1 " "/Ob2 " CMAKE_CXX_FLAGS_RELWITHDEBINFO ${CMAKE_CXX_FLAGS_RELWITHDEBINFO} )

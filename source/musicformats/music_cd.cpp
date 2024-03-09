@@ -34,7 +34,7 @@
 #include "zmusic/zmusic_internal.h"
 #include "zmusic/musinfo.h"
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(_WINDOWS_UWP)
 
 #include "zmusic/m_swap.h"
 #include "win32/i_cd.h"
